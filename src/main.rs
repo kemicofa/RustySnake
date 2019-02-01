@@ -4,6 +4,9 @@
 *
 */
 
+use std::time::{Duration, Instant};
+use std::thread::sleep;
+
 struct Direction {
 	x: i32,
 	y: i32,
@@ -35,9 +38,9 @@ impl Snake {
 	fn move_forward(&mut self){
                 let len = self.body.len();
                 self.body.rotate_right(len);
-                if let Some(block) = self.body.first(){
+                if let Some(block) = self.body.first_mut(){
                     block.update(self.head.x, self.head.y);
-                }
+                };
 		self.head.update(self.head.x + self.dir.x, self.head.y + self.dir.y);	
 	}
 
@@ -50,12 +53,7 @@ impl Snake {
 
 	/** determines if the given coordinates belong to the snake */
 	fn is_self(&self, x: i32, y: i32)->bool{
-		loop {
-			match self.body.iter().next() {
-				Some(block) => { if block.x == x && block.y == y { break true }},
-				None => { break false }
-			}
-		}
+		self.body.iter().any(|block| block.x == x && block.y == y)
 	}
 } 
 
@@ -98,8 +96,23 @@ impl Game {
 	}
 	/** method that ends the snake game */
 	fn end(&self){}
-	/** game loop */
-	fn game_loop(&self){}
+	/** game loop 60fps */
+	fn game_loop(&self){
+            
+            let milli_per_frame:u64 = 1000/60;
+
+            loop {
+                let now = Instant::now();
+                self.update();
+                self.draw();
+                
+                
+                let time_to_sleep = milli_per_frame - now.elapsed().as_millis();
+                println!("{}", time_to_sleep);
+                if time_to_sleep > 0 { sleep(Duration::from_millis(time_to_sleep)); }             
+            }
+
+        }
 	/** method that updates all entities that need to be drawn */
 	fn update(&self){}
 	/** draws all entities */
