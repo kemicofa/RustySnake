@@ -18,16 +18,16 @@ struct Snake {
 /** struct methods for Snake */
 impl Snake {
 	/** returns the current coordinates of the head position */
-	fn current_position(&self)->(i32,i32) {
+	fn current_position(&mut self)->(i32,i32) {
 		let block = self.blocks.first().unwrap();
-		(block.x, block.y)
-	}
+	        (block.x, block.y)
+        }
 
 	/** moves the snake by one to the current direction it's going */
 	fn move_forward(&mut self){
+                let bl = self.blocks.pop().unwrap();
 		let bf = self.blocks.first().unwrap();
-		let mut blocks = &self.blocks;
-		let bl = blocks.pop().unwrap();
+
 		bl.update(bf.x, bf.y);
 		self.blocks.insert(1, bl);
 		bf.update(bf.x + self.dir.x, bf.y + self.dir.y);	
@@ -70,9 +70,19 @@ impl Block {
 struct Game {
 	score: i32,
 	speed: i32,
+        snake: Snake
 }
 
 impl Game {
+        
+        fn new() -> Game {
+            Game {
+                score: 0,
+                speed: 0,
+                snake: Snake { blocks: vec![], dir: Direction{x: 1, y: 0}  }
+            }
+        }
+
 	/** method used to start the game, also resets key variables */
 	fn start(&mut self){
 		self.score = 0;
@@ -90,7 +100,7 @@ impl Game {
 }
 
 fn main() {
-	let mut game = Game{score: 0, speed: 0};
+	let mut game = Game::new();
 	game.start();
 }
 
