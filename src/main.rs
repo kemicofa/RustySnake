@@ -11,40 +11,47 @@ struct Direction {
 
 /** snake structure */
 struct Snake {
-	blocks: Vec<Block>,
+        head: Block,
+	body: Vec<Block>,
 	dir: Direction,
 }
 
 /** struct methods for Snake */
 impl Snake {
+        fn new() -> Snake {
+            Snake {
+                head: Block{x:3,y:2,s:'@'},
+                body: Vec::new(),
+                dir: Direction{x:1,y:0}
+            }
+        }
 	/** returns the current coordinates of the head position */
 	fn current_position(&mut self)->(i32,i32) {
-		let block = self.blocks.first().unwrap();
+		let block = self.body.first().unwrap();
 	        (block.x, block.y)
         }
 
 	/** moves the snake by one to the current direction it's going */
 	fn move_forward(&mut self){
-                let bl = self.blocks.pop().unwrap();
-		let bf = self.blocks.first().unwrap();
-
-		bl.update(bf.x, bf.y);
-		self.blocks.insert(1, bl);
-		bf.update(bf.x + self.dir.x, bf.y + self.dir.y);	
+                let len = self.body.len();
+                self.body.rotate_right(len);
+                if let Some(block) = self.body.first(){
+                    block.update(self.head.x, self.head.y);
+                }
+		self.head.update(self.head.x + self.dir.x, self.head.y + self.dir.y);	
 	}
 
 	/** adds a block to the snake */
 	fn grow(&mut self){
-		let bf = self.blocks.first().unwrap();
-		let b = Block {x: bf.x, y: bf.y, s: '#'};
-		self.blocks.insert(1, b);
-		bf.update(bf.x + self.dir.x, bf.y + self.dir.y);
+		let block = Block {x: self.head.x, y: self.head.y, s: '#'};
+		self.body.insert(0, block);
+		self.head.update(self.head.x + self.dir.x, self.head.y + self.dir.y);
 	}
 
 	/** determines if the given coordinates belong to the snake */
 	fn is_self(&self, x: i32, y: i32)->bool{
 		loop {
-			match self.blocks.iter().next() {
+			match self.body.iter().next() {
 				Some(block) => { if block.x == x && block.y == y { break true }},
 				None => { break false }
 			}
@@ -79,7 +86,7 @@ impl Game {
             Game {
                 score: 0,
                 speed: 0,
-                snake: Snake { blocks: vec![], dir: Direction{x: 1, y: 0}  }
+                snake: Snake::new()
             }
         }
 
